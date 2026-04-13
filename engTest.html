@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>英単語クイズ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#007aff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="EngTest">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+  <style>
+    :root {
+      --primary: #007aff;
+      --primary-hover: #005bb5;
+      --primary-soft: #e6f0ff;
+      --secondary: #f2f2f7;
+      --danger: #ff3b30;
+      --danger-hover: #d32f2f;
+      --danger-soft: #ffecec;
+      --warning: #ff9500;
+      --warning-hover: #e08200;
+      --success: #28a745;
+      --success-hover: #218838;
+      --success-soft: #e7f7ec;
+      --text: #1c1c1e;
+      --text-light: #6b7280;
+      --text-muted: #9ca3af;
+      --bg: #f2f2f7;
+      --bg-grad: linear-gradient(180deg, #f7f9fc 0%, #eef1f6 100%);
+      --card-bg: #ffffff;
+      --border: #e5e7eb;
+      --shadow-sm: 0 1px 2px rgba(16,24,40,0.04), 0 1px 3px rgba(16,24,40,0.05);
+      --shadow-md: 0 4px 12px rgba(16,24,40,0.06), 0 2px 4px rgba(16,24,40,0.04);
+      --shadow-lg: 0 12px 32px rgba(16,24,40,0.08);
+      --radius: 14px;
+      --radius-sm: 10px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #0a84ff;
+        --primary-hover: #3395ff;
+        --primary-soft: #162a44;
+        --secondary: #1c1c1e;
+        --danger: #ff453a;
+        --danger-hover: #ff6b63;
+        --danger-soft: #3a1c1c;
+        --warning: #ff9f0a;
+        --warning-hover: #ffb33a;
+        --success: #32d74b;
+        --success-hover: #4be066;
+        --success-soft: #17321e;
+        --text: #f5f5f7;
+        --text-light: #a1a1a6;
+        --text-muted: #6b7280;
+        --bg: #000000;
+        --bg-grad: linear-gradient(180deg, #111113 0%, #0a0a0b 100%);
+        --card-bg: #1c1c1e;
+        --border: #2c2c2e;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+        --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", Roboto, sans-serif;
+      margin: 0;
+      padding: 24px 16px 48px;
+      line-height: 1.6;
+      background: var(--bg-grad);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-shell {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      margin: 0 0 4px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, var(--primary) 0%, #5856d6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      font-size: 0.88rem;
+      color: var(--text-light);
+      margin: 0;
+    }
+
+    .card, .settings-area {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    .card { box-shadow: var(--shadow-md); }
+
+    .label {
+      font-size: 0.78rem;
+      color: var(--text-light);
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .word {
+      font-size: 2.4rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 16px 0 24px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+      word-break: break-word;
+      animation: wordIn 0.28s ease-out;
+    }
+
+    @keyframes wordIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    input[type="number"] {
+      width: 90px;
+      padding: 10px 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      text-align: center;
+      background: var(--card-bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      margin: 14px 0 4px;
+      padding: 14px;
+      font-size: 0.9rem;
+      background-color: var(--bg);
+      border: 1.5px dashed var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-light);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    input[type="file"]:hover { border-color: var(--primary); }
+
+    button {
+      display: block;
+      width: 100%;
+      padding: 13px 16px;
+      margin-top: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      background-color: var(--primary);
+      color: white;
+      transition: background-color 0.18s, transform 0.08s, box-shadow 0.18s;
+      box-shadow: var(--shadow-sm);
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+      box-shadow: var(--shadow-md);
+    }
+    button:active:not(:disabled) { transform: scale(0.98); }
+    button:disabled {
+      background-color: var(--border);
+      color: var(--text-muted);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-warning { background-color: var(--warning); }
+    .btn-warning:hover:not(:disabled) { background-color: var(--warning-hover); }
+
+    .btn-danger { background-color: var(--danger); }
+    .btn-danger:hover:not(:disabled) { background-color: var(--danger-hover); }
+
+    .btn-outline {
+      background-color: transparent;
+      color: var(--danger);
+      border: 1.5px solid var(--danger);
+      padding: 10px 12px;
+      box-shadow: none;
+    }
+    .btn-outline:hover:not(:disabled) { background-color: var(--danger-soft); }
+
+    .btn-ghost {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      padding: 10px 12px;
+      font-weight: 600;
+      box-shadow: none;
+    }
+    .btn-ghost:hover:not(:disabled) { background-color: var(--primary-soft); }
+
+    .result {
+      font-size: 1.2rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 18px 0 6px;
+      color: var(--success);
+      min-height: 1.8rem;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      transition: background 0.2s, color 0.2s;
+    }
+    .result.correct {
+      color: var(--success);
+      background: var(--success-soft);
+      animation: pop 0.3s ease-out;
+    }
+    .result.wrong {
+      color: var(--danger);
+      background: var(--danger-soft);
+      animation: shake 0.3s;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.92); opacity: 0; }
+      60% { transform: scale(1.03); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    .small {
+      font-size: 0.85rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    .progress-wrap {
+      margin-top: 12px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, #5856d6 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    #historyList {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #historyList li {
+      padding: 12px 4px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.98rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    #historyList li:last-child { border-bottom: none; }
+    #historyList li.history-empty {
+      justify-content: center;
+      color: var(--text-muted);
+      padding: 20px 0;
+    }
+
+    .history-words {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+      flex: 1;
+    }
+    .history-words .en-word {
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-word;
+    }
+    .history-words .ja-word {
+      color: var(--text-light);
+      font-size: 0.88rem;
+      word-break: break-word;
+    }
+
+    .history-weak-btn {
+      width: auto;
+      margin: 0;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: transparent;
+      color: var(--danger);
+      border: 1.5px solid var(--danger);
+      border-radius: 999px;
+      box-shadow: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .history-weak-btn:hover:not(:disabled) { background: var(--danger-soft); }
+    .history-weak-btn.is-weak {
+      background: var(--danger);
+      color: white;
+    }
+    .history-weak-btn.is-weak:hover:not(:disabled) { background: var(--danger-hover); }
+
+    .mode-select {
+      display: flex;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+    .mode-select label {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s;
+      background: var(--card-bg);
+    }
+    .mode-select label:has(input:checked) {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 600;
+    }
+    .mode-select input[type="radio"] { margin: 0; accent-color: var(--primary); }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+    }
+    .toggle-row label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: var(--text);
+      margin: 0;
+    }
+    .toggle-row input[type="checkbox"] { accent-color: var(--primary); }
+
+    input[type="text"]#answerInput {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1.15rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--card-bg);
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type="text"]#answerInput:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-soft);
+    }
+
+    .weak-count-chip {
+      display: inline-block;
+      min-width: 28px;
+      padding: 2px 10px;
+      background: var(--danger);
+      color: white;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .score-wrap { text-align: center; }
+    .score-chip {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 420px) {
+      h1 { font-size: 1.5rem; }
+      .word { font-size: 2rem; }
+      .mode-select { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <h1>📘 英単語クイズ</h1>
+      <p class="subtitle">iPhone / PC 対応・オフラインで動作</p>
+    </header>
+
+    <div class="settings-area">
+      <div class="label">出題モード</div>
+      <div class="mode-select">
+        <label><input type="radio" name="mode" value="flash" checked /> 英→和</label>
+        <label><input type="radio" name="mode" value="typing" /> 和→英（タイピング）</label>
+      </div>
+
+      <div class="toggle-row" style="margin-top:12px;">
+        <label><input type="checkbox" id="ttsToggle" checked /> 🔊 音声読み上げ</label>
+      </div>
+
+      <div class="label" style="margin-top:16px;">出題範囲（番号で指定・空欄なら全て）</div>
+      <div class="input-group">
+        <input type="number" id="startNum" placeholder="1" min="1" /> <span>番目 〜</span>
+        <input type="number" id="endNum" placeholder="最後" min="1" /> <span>番目</span>
+      </div>
+
+      <input type="file" id="fileInput" accept=".csv" />
+      <button id="restartBtn" style="display:none;">🔄 現在の設定でやり直す</button>
+      <div id="status" class="small"></div>
+    </div>
+
+    <div class="settings-area" id="weakControlArea" style="display: none;">
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom: 14px; font-weight: 600;">
+        ⚠️ 苦手単語 <span id="weakCount" class="weak-count-chip">0</span> 語
+      </div>
+      <button id="startWeakBtn" class="btn-warning">苦手リストから出題する</button>
+      <button id="clearWeakBtn" class="btn-outline">苦手リストを消去</button>
+    </div>
+
+    <div class="card" id="quizArea" style="display:none;">
+      <div class="label" id="questionLabel">問題（英→和）</div>
+      <div class="word" id="questionWord"></div>
+
+      <button id="speakBtn" class="btn-ghost" style="display:none;">🔊 発音を聞く</button>
+
+      <div id="answerInputArea" style="display:none; margin-top:10px;">
+        <input type="text" id="answerInput" placeholder="英単語を入力してEnter" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />
+      </div>
+
+      <button id="checkBtn">答えを見る</button>
+      <button id="nextBtn" disabled>次の問題</button>
+      <button id="markWeakBtn" class="btn-danger" style="display:none;">この単語を「苦手」に登録</button>
+
+      <div class="result" id="resultArea"></div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="small" id="progress"></div>
+        <div class="score-wrap"><span class="score-chip" id="score" style="display:none;"></span></div>
+      </div>
+    </div>
+
+    <div class="card" id="historyArea" style="display:none;">
+      <div class="label">履歴（直近5件）</div>
+      <ul id="historyList"></ul>
+    </div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((e) => {
+          console.warn('Service Worker 登録失敗:', e);
+        });
+      });
+    }
+
+    let rawVocabList = []; // CSV全件（範囲フィルタ前）
+    let vocabList = []; // 現在のクイズ用リスト
+    let weakVocabList = []; // 苦手単語リスト
+    let currentIndex = -1;
+    let usedIndices = [];
+    let historyData = []; // 履歴保存用
+    let currentMode = 'flash'; // 'flash' or 'typing'
+    let answered = false; // 現在の問題で判定済みか
+    let correctCount = 0;
+    let answeredCount = 0;
+
+    const fileInput = document.getElementById('fileInput');
+    const statusEl = document.getElementById('status');
+    const ttsToggle = document.getElementById('ttsToggle');
+    const modeRadios = document.querySelectorAll('input[name="mode"]');
+    const restartBtn = document.getElementById('restartBtn');
+
+    const weakControlArea = document.getElementById('weakControlArea');
+    const weakCountEl = document.getElementById('weakCount');
+    const startWeakBtn = document.getElementById('startWeakBtn');
+    const clearWeakBtn = document.getElementById('clearWeakBtn');
+
+    const quizArea = document.getElementById('quizArea');
+    const questionLabel = document.getElementById('questionLabel');
+    const questionWord = document.getElementById('questionWord');
+    const speakBtn = document.getElementById('speakBtn');
+    const answerInputArea = document.getElementById('answerInputArea');
+    const answerInput = document.getElementById('answerInput');
+    const checkBtn = document.getElementById('checkBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resultArea = document.getElementById('resultArea');
+    const markWeakBtn = document.getElementById('markWeakBtn');
+    const progressEl = document.getElementById('progress');
+    const progressFill = document.getElementById('progressFill');
+    const scoreEl = document.getElementById('score');
+    const historyArea = document.getElementById('historyArea');
+    const historyList = document.getElementById('historyList');
+
+    loadWeakList();
+
+    fileInput.addEventListener('change', handleFileSelect, false);
+    checkBtn.addEventListener('click', checkAnswer);
+    nextBtn.addEventListener('click', nextRandomQuestion);
+    markWeakBtn.addEventListener('click', markCurrentAsWeak);
+    
+    startWeakBtn.addEventListener('click', startWeakQuiz);
+    clearWeakBtn.addEventListener('click', clearWeakList);
+
+    speakBtn.addEventListener('click', () => {
+      if (currentIndex < 0) return;
+      speakEnglish(vocabList[currentIndex].en);
+    });
+
+    modeRadios.forEach(r => r.addEventListener('change', () => {
+      currentMode = document.querySelector('input[name="mode"]:checked').value;
+      if (vocabList.length > 0 && currentIndex >= 0 && !answered) {
+        renderCurrentQuestion(false);
+      }
+    }));
+
+    ttsToggle.addEventListener('change', () => {
+      if (currentIndex < 0) return;
+      if (!ttsToggle.checked) {
+        try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch(e) {}
+        speakBtn.style.display = 'none';
+      } else if (currentMode === 'flash' || answered) {
+        // タイピングモードでは解答後のみ発音ボタンを出す
+        speakBtn.style.display = 'block';
+      }
+    });
+
+    restartBtn.addEventListener('click', () => {
+      if (rawVocabList.length === 0) return;
+      startQuizFromSettings('CSVファイル');
+    });
+
+    // タイピングモードでEnterキーを握るため、input内は専用処理にして全体リスナーと競合させない
+    answerInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (!answered && !checkBtn.disabled) {
+          checkAnswer();
+        } else if (!nextBtn.disabled) {
+          nextRandomQuestion();
+        }
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.target === answerInput) return; // input側で処理済み
+      if (e.key === 'Enter') {
+        if (!checkBtn.disabled) {
+          checkAnswer();
+        } else if (!nextBtn.disabled) {
+          nextRandomQuestion();
+        }
+      }
+    });
+
+    function loadWeakList() {
+      let saved = null;
+      try {
+        saved = localStorage.getItem('weakVocabList');
+      } catch (e) {
+        console.warn('ローカルストレージにアクセスできません:', e);
+      }
+      
+      if (saved) {
+        try {
+          weakVocabList = JSON.parse(saved);
+        } catch (e) {
+          weakVocabList = [];
+        }
+      } else {
+        weakVocabList = [];
+      }
+      updateWeakArea();
+    }
+
+    function saveWeakList() {
+      try {
+        localStorage.setItem('weakVocabList', JSON.stringify(weakVocabList));
+      } catch (e) {
+        console.warn('ローカルストレージに保存できません:', e);
+      }
+      updateWeakArea();
+    }
+
+    function updateWeakArea() {
+      weakCountEl.textContent = weakVocabList.length;
+      weakControlArea.style.display = 'block';
+      startWeakBtn.disabled = weakVocabList.length === 0;
+    }
+
+    function isWeakWord(en) {
+      return weakVocabList.some(w => w.en === en);
+    }
+
+    function setMarkWeakButton(isWeak) {
+      if (isWeak) {
+        markWeakBtn.textContent = "✓ 登録済み（クリックで解除）";
+        markWeakBtn.className = "btn-outline";
+      } else {
+        markWeakBtn.textContent = "この単語を「苦手」に登録";
+        markWeakBtn.className = "btn-danger";
+      }
+    }
+
+    function toggleWeakEntry(item) {
+      const idx = weakVocabList.findIndex(w => w.en === item.en);
+      if (idx === -1) {
+        weakVocabList.push({ en: item.en, ja: item.ja });
+      } else {
+        weakVocabList.splice(idx, 1);
+      }
+      saveWeakList();
+      return idx === -1; // trueなら新規追加、falseなら解除
+    }
+
+    function markCurrentAsWeak() {
+      if (currentIndex < 0 || currentIndex >= vocabList.length) return;
+      const added = toggleWeakEntry(vocabList[currentIndex]);
+      setMarkWeakButton(added);
+    }
+
+    function startWeakQuiz() {
+      if (weakVocabList.length === 0) return;
+      vocabList = [...weakVocabList];
+      startQuizBase('苦手単語リスト');
+    }
+
+    function clearWeakList() {
+      if (confirm("登録されている苦手単語をすべて消去しますか？")) {
+        weakVocabList = [];
+        saveWeakList();
+      }
+    }
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      statusEl.textContent = '読み込み中...';
+      const reader = new FileReader();
+
+      reader.onload = function(evt) {
+        const text = evt.target.result;
+        processCSV(text);
+      };
+      
+      reader.onerror = function() {
+        statusEl.textContent = 'ファイルの読み込みに失敗しました。';
+      };
+
+      // UTF-8で読み込む。文字化けする場合は 'Shift_JIS' に変更
+      reader.readAsText(file, 'UTF-8');
+    }
+
+    function processCSV(text) {
+      // 行ごとに分割 (WindowsとMacの改行コードに対応)
+      const lines = text.split(/\r\n|\n/);
+
+      let tempVocabList = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        let cells = line.split(',');
+        cells = cells.map(v => v.replace(/^"|"$/g, '').trim());
+
+        if (cells.length >= 2) {
+          tempVocabList.push({ originalIndex: tempVocabList.length + 1, en: cells[0], ja: cells[1] });
+        }
+      }
+
+      if (tempVocabList.length === 0) {
+        statusEl.textContent = '有効なデータが見つかりませんでした。';
+        quizArea.style.display = 'none';
+        restartBtn.style.display = 'none';
+        return;
+      }
+
+      rawVocabList = tempVocabList;
+      restartBtn.style.display = 'block';
+      startQuizFromSettings('CSVファイル');
+    }
+
+    // rawVocabList を元に、現在の範囲設定を適用してクイズを開始/再開
+    function startQuizFromSettings(sourceName) {
+      if (rawVocabList.length === 0) return;
+
+      const startInput = document.getElementById('startNum').value;
+      const endInput = document.getElementById('endNum').value;
+
+      let startIdx = parseInt(startInput, 10);
+      let endIdx = parseInt(endInput, 10);
+
+      if (isNaN(startIdx) || startIdx < 1) startIdx = 1;
+      if (isNaN(endIdx) || endIdx > rawVocabList.length) endIdx = rawVocabList.length;
+
+      if (startIdx > endIdx) {
+        const tmp = startIdx; startIdx = endIdx; endIdx = tmp;
+      }
+
+      vocabList = rawVocabList.slice(startIdx - 1, endIdx);
+
+      if (vocabList.length === 0) {
+        statusEl.textContent = '指定された範囲にデータがありません。';
+        quizArea.style.display = 'none';
+        return;
+      }
+
+      startQuizBase(sourceName || 'CSVファイル');
+    }
+
+    function startQuizBase(sourceName) {
+      statusEl.textContent = `読み込み完了：${vocabList.length}語（${sourceName}）`;
+
+      // 出題開始時点でモードを固定（途中切替は次問から反映される）
+      currentMode = document.querySelector('input[name="mode"]:checked').value;
+
+      shuffleArray(vocabList);
+
+      usedIndices = [];
+      historyData = [];
+      correctCount = 0;
+      answeredCount = 0;
+      quizArea.style.display = 'block';
+      historyArea.style.display = 'block';
+      updateHistoryUI();
+      nextBtn.disabled = true;
+      checkBtn.disabled = false;
+      markWeakBtn.style.display = 'none';
+      resultArea.textContent = '';
+      resultArea.className = 'result';
+      scoreEl.textContent = '';
+      scoreEl.style.display = 'none';
+      updateProgressUI();
+
+      nextRandomQuestion();
+    }
+
+    function updateProgressUI() {
+      const done = usedIndices.length;
+      const total = vocabList.length || 1;
+      progressEl.textContent = `進捗：${usedIndices.length} / ${vocabList.length}`;
+      progressFill.style.width = Math.min(100, (done / total) * 100) + '%';
+    }
+
+    // 配列をランダムに並び替える関数（フィッシャー–イェーツのシャッフル）
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function nextRandomQuestion() {
+      if (usedIndices.length === vocabList.length) {
+        resultArea.textContent = '全ての問題を出題しました。お疲れさまです。';
+        resultArea.className = 'result';
+        questionWord.textContent = '';
+        checkBtn.disabled = true;
+        nextBtn.disabled = true;
+        markWeakBtn.style.display = 'none';
+        speakBtn.style.display = 'none';
+        answerInputArea.style.display = 'none';
+        updateProgressUI();
+        return;
+      }
+
+      currentIndex = usedIndices.length;
+      usedIndices.push(currentIndex);
+      answered = false;
+
+      resultArea.textContent = '';
+      resultArea.className = 'result';
+      nextBtn.disabled = true;
+      markWeakBtn.style.display = 'none';
+      markWeakBtn.textContent = "この単語を「苦手」に登録";
+      markWeakBtn.className = "btn-danger";
+      markWeakBtn.disabled = false;
+
+      renderCurrentQuestion(true);
+
+      updateProgressUI();
+    }
+
+    // 現在の問題を現モードで描画（モード切替や設定変更時にも呼べる）
+    function renderCurrentQuestion(speakIfFlash) {
+      if (currentIndex < 0 || currentIndex >= vocabList.length) return;
+      const item = vocabList[currentIndex];
+
+      if (currentMode === 'typing') {
+        questionLabel.textContent = '問題（和→英：入力してEnter）';
+        questionWord.textContent = item.ja;
+        answerInputArea.style.display = 'block';
+        if (!answered) {
+          answerInput.value = '';
+          answerInput.disabled = false;
+          answerInput.focus();
+          speakBtn.style.display = 'none';
+          checkBtn.textContent = '判定する';
+          checkBtn.disabled = false;
+        } else {
+          answerInput.disabled = true;
+          speakBtn.style.display = ttsToggle.checked ? 'block' : 'none';
+        }
+      } else {
+        questionLabel.textContent = '問題（英→和）';
+        questionWord.textContent = item.en;
+        answerInputArea.style.display = 'none';
+        speakBtn.style.display = ttsToggle.checked ? 'block' : 'none';
+        if (!answered) {
+          checkBtn.textContent = '答えを見る';
+          checkBtn.disabled = false;
+          if (speakIfFlash && ttsToggle.checked) speakEnglish(item.en);
+        }
+      }
+    }
+
+    function checkAnswer() {
+      if (currentIndex < 0 || currentIndex >= vocabList.length) return;
+      if (answered) return;
+
+      const currentItem = vocabList[currentIndex];
+
+      if (currentMode === 'typing') {
+        const userAns = answerInput.value;
+        // 複数訳語の想定：「/」「,」「、」区切りのいずれかを許容
+        const accepted = currentItem.en.split(/[\/,、]/).map(s => normalize(s)).filter(Boolean);
+        const isCorrect = accepted.includes(normalize(userAns));
+
+        answeredCount++;
+        if (isCorrect) correctCount++;
+
+        if (isCorrect) {
+          resultArea.textContent = `⭕ 正解！  ${currentItem.en}`;
+          resultArea.className = 'result correct';
+        } else {
+          resultArea.textContent = `❌ 不正解　正解: ${currentItem.en}`;
+          resultArea.className = 'result wrong';
+        }
+        answerInput.disabled = true;
+        scoreEl.textContent = `🎯 スコア ${correctCount} / ${answeredCount}`;
+        scoreEl.style.display = 'inline-block';
+        if (ttsToggle.checked) speakEnglish(currentItem.en);
+        speakBtn.style.display = ttsToggle.checked ? 'block' : 'none';
+      } else {
+        resultArea.textContent = '答え: ' + currentItem.ja;
+        resultArea.className = 'result';
+      }
+
+      historyData.unshift({ en: currentItem.en, ja: currentItem.ja });
+      if (historyData.length > 5) historyData.pop();
+      updateHistoryUI();
+
+      setMarkWeakButton(isWeakWord(currentItem.en));
+
+      answered = true;
+      checkBtn.disabled = true;
+      nextBtn.disabled = false;
+      markWeakBtn.disabled = false;
+      markWeakBtn.style.display = 'block';
+    }
+
+    function updateHistoryUI() {
+      historyList.innerHTML = '';
+      if (historyData.length === 0) {
+        historyList.innerHTML = '<li class="history-empty">まだ履歴はありません</li>';
+        return;
+      }
+      historyData.forEach(item => {
+        const li = document.createElement('li');
+        const weak = isWeakWord(item.en);
+
+        const wordSpan = document.createElement('div');
+        wordSpan.className = 'history-words';
+        wordSpan.innerHTML = `<span class="en-word">${escapeHtml(item.en)}</span><span class="ja-word">${escapeHtml(item.ja)}</span>`;
+
+        const btn = document.createElement('button');
+        btn.className = 'history-weak-btn' + (weak ? ' is-weak' : '');
+        btn.textContent = weak ? '✓ 苦手' : '+ 苦手';
+        btn.title = weak ? 'クリックで苦手から外す' : 'クリックで苦手に追加';
+        btn.addEventListener('click', () => toggleWeakFromHistory(item));
+
+        li.appendChild(wordSpan);
+        li.appendChild(btn);
+        historyList.appendChild(li);
+      });
+    }
+
+    function toggleWeakFromHistory(item) {
+      toggleWeakEntry(item);
+      updateHistoryUI();
+      // 現在の問題が同じ単語で苦手ボタン表示中なら同期
+      if (currentIndex >= 0 && vocabList[currentIndex] && vocabList[currentIndex].en === item.en
+          && markWeakBtn.style.display !== 'none') {
+        setMarkWeakButton(isWeakWord(item.en));
+      }
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+
+    // 全角・半角やスペースの違いをある程度吸収するための簡易正規化
+    function normalize(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/\s+/g, '') // 空白削除
+        .replace(/[！-～]/g, function(ch) {
+          return String.fromCharCode(ch.charCodeAt(0) - 0xFEE0);
+        }) // 全角英数記号→半角
+        .toLowerCase();
+    }
+
+    function speakEnglish(text) {
+      if (!('speechSynthesis' in window)) return;
+      if (!ttsToggle.checked) return;
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'en-US';
+        u.rate = 0.95;
+        window.speechSynthesis.speak(u);
+      } catch (e) {
+        console.warn('音声読み上げに失敗:', e);
+      }
+    }
+  </script>
+</body>
+</html>
